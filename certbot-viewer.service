@@ -1,0 +1,11 @@
+[Unit] 
+Description=Certbot Viewer
+After=network.target
+
+[Service] 
+WorkingDirectory=/path/to/certbot-viewer
+Environment="NODE_ENV=production" 
+ExecStart=/usr/bin/npx next start -p 8080
+
+[Install] 
+WantedBy=multi-user.target
