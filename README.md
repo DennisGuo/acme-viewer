@@ -7,6 +7,7 @@ Web viewer for certbot , show certificates live domain ssl key on web page.
 
 ## dependencies
 
+- nodejs 18+
 - nextjs
 
 ## Build and run 
@@ -36,9 +37,23 @@ AUTH_SALT=354120C6-C7A5-48C4-AD87-E2CEAE7A032D
 LETSENCRYPT_LIVE_DIR=/etc/letsencrypt/live
 ```
 
-## Deploy 
+## Usage  
 
-### Using systemd
+### Clone repo
+
+```shell
+# clone repo
+git clone https://github.com/DennisGuo/certbot-viewer.git
+
+# install dependencies
+cd certbot-viewer
+npm install
+
+# run 
+npx next start -p 8080
+```
+
+### Deoploy with systemd
 
 ```shell
 
