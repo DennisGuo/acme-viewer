@@ -3,9 +3,9 @@ Description=Certbot Viewer
 After=network.target
 
 [Service] 
-WorkingDirectory=/path/to/certbot-viewer
+WorkingDirectory=/home/ghx/workspace/certbot-viewer
 Environment="NODE_ENV=production" 
-ExecStart=/usr/bin/npx next start -p 8080
+ExecStart=/home/ghx/workspace/certbot-viewer/start.sh
 
 [Install] 
 WantedBy=multi-user.target
