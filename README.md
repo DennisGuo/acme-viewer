@@ -16,10 +16,6 @@ Web viewer for certbot , show certificates live domain ssl key on web page.
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 ## Config
@@ -49,6 +45,8 @@ git clone https://github.com/DennisGuo/certbot-viewer.git
 cd certbot-viewer
 npm install
 
+# build
+npm run build
 # run 
 npx next start -p 8080
 ```
