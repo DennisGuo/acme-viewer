@@ -108,7 +108,15 @@ export default function DashboardPage({
                   >
                     <div>{domain.name}</div>
                     {domain.cert ? (
-                      <div className="text-sm text-red-300">
+                      <div
+                        className={`text-sm ${
+                          dayjs(
+                            (domain.cert as PeerCertificate).valid_to
+                          ).isBefore(dayjs().add(15, "day"))
+                            ? "text-red-400"
+                            : "text-green-500"
+                        }`}
+                      >
                         {dayjs(
                           (domain.cert as PeerCertificate).valid_to
                         ).format("YYYY/MM/DD")}
