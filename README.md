@@ -1,7 +1,7 @@
 
-# Certbot Viewer
+# ACME Viewer
 
-Web viewer for certbot , show certificates live domain ssl key on web page.
+Web viewer for acme.sh , show certificates live domain ssl key on web page.
 
 <img src="./screen.jpg" width="600px" />
 
@@ -29,8 +29,6 @@ AUTH_USER=admin
 AUTH_PASS=admin1234
 # login salt , random string 
 AUTH_SALT=354120C6-C7A5-48C4-AD87-E2CEAE7A032D
-# certbot domin live dir 
-LETSENCRYPT_LIVE_DIR=/etc/letsencrypt/live
 ```
 
 ## Usage  

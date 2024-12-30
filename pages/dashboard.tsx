@@ -1,34 +1,39 @@
-import * as fs from "fs";
-import path from "path";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import copyIt from "copy-to-clipboard";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
 import Empty from "@/components/empty";
 import dayjs from "dayjs";
-import { PeerCertificate, TLSSocket } from "tls";
-import { Duplex } from "stream";
-
-type Domain = {
-  name: string;
-  cert?: Cert;
-};
-type Cert = {
-  valid_from: string;
-  valid_to: string;
-};
+import { Domain, DomainGroup, getDomainGroupss } from "@/utils/db";
 
 export default function DashboardPage({
-  domains
+  groups
 }: Readonly<{
-  domains: Domain[];
+  groups: DomainGroup[];
 }>) {
   const router = useRouter();
   const [crtDomain, setCrtDomain] = useState<Domain>();
-  const [files, setFiles] = useState<
-    { name: string; content: string; cert?: PeerCertificate }[]
-  >([]);
+
+  const [form, setForm] = useState(false);
+  const [path, setPath] = useState("");
+
+  const files = useMemo<{ name: string; content: string }[]>((): {
+    name: string;
+    content: string;
+  }[] => {
+    if (!crtDomain) return [];
+    return [
+      {
+        name: "fullchain.cert",
+        content: crtDomain.cert?.fullchain || ""
+      },
+      {
+        name: "private.key",
+        content: crtDomain.cert?.key || ""
+      }
+    ];
+  }, [crtDomain]);
 
   const logout = async () => {
     // delete cookie
@@ -42,15 +47,6 @@ export default function DashboardPage({
 
   const clickDomain = async (domain: Domain) => {
     setCrtDomain(domain);
-
-    const res = await fetch(`/api/domain/detail?domain=${domain.name}`);
-    if (res.ok) {
-      const arr = (await res.json()).data;
-      setFiles(arr);
-    } else {
-      setFiles([]);
-      toast("Failed to get domain detail");
-    }
   };
 
   const toCopy = (content: string) => {
@@ -63,6 +59,50 @@ export default function DashboardPage({
     const blob = new Blob([item.content], { type: "text/plain;charset=utf-8" });
     saveAs(blob, item.name);
   };
+
+  const onInputChange = (e: any) => {
+    const path = e.target.value as string;
+    setPath(path);
+  };
+
+  const toSave = async () => {
+    if (!path) {
+      alert("Plase input scan path !");
+      return;
+    }
+
+    const ok = confirm("Confirm to add path?");
+    if (ok) {
+      const res = await fetch(`/api/domain/add`, {
+        method: "POST",
+        body: JSON.stringify({ path })
+      });
+      const json = await res.json();
+      if (json.data) {
+        window.location.reload();
+        alert("Add Success !");
+      } else {
+        alert("Add Failed !");
+      }
+    }
+  };
+
+  const removePath = async (path:string)=>{
+    const ok = confirm(`Confirm to remove【${path}】 path ?`);
+    if(ok){
+      const res = await fetch(`/api/domain/remove`, {
+        method: "POST",
+        body: JSON.stringify({ path })
+      });
+      const json = await res.json();
+      if(json.data){
+        window.location.reload();
+        alert("Remove Success !");
+      }else{
+        alert("Remove Failed !");
+      }
+    }
+  }
 
   // const Certinfo = ({ cert }: { cert: PeerCertificate }) => {
   //   const from = dayjs(cert?.valid_from);
@@ -81,51 +121,96 @@ export default function DashboardPage({
   return (
     <div className="flex flex-col h-screen">
       <h1 className="bg-blue-300 text-white px-4 py-2 flex flex-row text-lg text-bold items-center justify-start">
-        <div className="flex-1">Certbot Viewer</div>
+        <div className="flex-1">ACME Viewer</div>
         <div className="text-slate-100 cursor-pointer text-sm" onClick={logout}>
-          Logout{" "}
+          Logout
         </div>
       </h1>
       <div className="flex flex-row flex-1">
         <div className="w-80 p-4 border border-l-0 border-b-0 border-t-0 flex flex-col">
-          <h2 className="py-2 text-bold border border-t-0 border-l-0 border-r-0">
+          <h2 className="py-2 text-bold border border-t-0 border-l-0 border-r-0 ">
             Domain List
           </h2>
           <div className="mt-4 flex-1 overflow-y-auto">
-            <div className="flex flex-col gap-y-2">
-              {domains
-                .filter((i) => i.name != "README")
-                .map((domain) => (
-                  <div
-                    className={
-                      "p-2 rounded  hover:bg-blue-100 cursor-pointer flex flex-col gap-y-2 " +
-                      (crtDomain?.name == domain.name
-                        ? "bg-blue-100"
-                        : "bg-gray-100")
-                    }
-                    key={domain.name}
-                    onClick={() => clickDomain(domain)}
+            <div className="mb-2">
+              {form ? (
+                <div className="flex flex-row gap-x-2">
+                  <input
+                    type="text"
+                    placeholder="/home/user/.acme.sh"
+                    className="p-2 rounded py-1 px-2 border border-blue-400 w-full"
+                    onChange={onInputChange}
+                  />
+                  <button
+                    className="bg-blue-400 py-1 px-2 text-sm w-[70px] rounded"
+                    onClick={(e) => toSave()}
                   >
-                    <div>{domain.name}</div>
-                    {domain.cert ? (
-                      <div
-                        className={`text-sm ${
-                          dayjs(
-                            (domain.cert as PeerCertificate).valid_to
-                          ).isBefore(dayjs().add(15, "day"))
-                            ? "text-red-400"
-                            : "text-green-500"
-                        }`}
-                      >
-                        {dayjs(
-                          (domain.cert as PeerCertificate).valid_to
-                        ).format("YYYY/MM/DD")}
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
+                    Add
+                  </button>
+                  <button
+                    className=" py-1 px-2 text-sm w-[70px]"
+                    onClick={(e) => setForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="bg-blue-400 py-1 px-2 text-sm rounded"
+                  onClick={(e) => setForm(true)}
+                >
+                  AddPath
+                </button>
+              )}
             </div>
-            {domains.length == 0 ? <Empty text="No domain exists." /> : null}
+            <div className="flex flex-col gap-y-2">
+              {groups.map((group) => {
+                return (
+                  <div key={group.path}>
+                    <div className="bg-slate-300 p-2 flex flex-row gap-x-2">
+                      <div className="flex-1">{group.path}</div>
+                      <button className="text-red-400 cursor-pinter text-sm" onClick={e=>removePath(group.path)}>
+                        Remove
+                      </button>
+                    </div>
+                    <div className="pl-4 flex flex-col gap-y-1 mt-1">
+                      {group.domains.map((domain) => {
+                        return (
+                          <div
+                            className={
+                              "p-2  hover:bg-blue-100 cursor-pointer flex flex-col " +
+                              (crtDomain?.name == domain.name
+                                ? "bg-blue-100"
+                                : "bg-gray-100")
+                            }
+                            key={domain.name}
+                            onClick={() => clickDomain(domain)}
+                          >
+                            <div>{domain.name}</div>
+                            {domain.cert ? (
+                              <div
+                                className={`text-sm ${
+                                  dayjs(domain.cert.valid_to).isBefore(
+                                    dayjs().add(15, "day")
+                                  )
+                                    ? "text-red-400"
+                                    : "text-green-500"
+                                }`}
+                              >
+                                {dayjs(domain.cert.valid_to).format(
+                                  "YYYY/MM/DD"
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {groups.length == 0 ? <Empty text="No domain exists." /> : null}
           </div>
         </div>
         <div className="p-4 flex-1">
@@ -175,36 +260,12 @@ export default function DashboardPage({
 export async function getServerSideProps() {
   // Fetch data from external API
   // read file list from process.env.LETSENCRYPT_LIVE_DIR
-  const domains = readFiles(
-    process.env.LETSENCRYPT_LIVE_DIR || "/etc/letsencrypt/live"
-  );
+  // const domains = readFiles(
+  //   process.env.LETSENCRYPT_LIVE_DIR || "/etc/letsencrypt/live"
+  // );
+
+  const groups = await getDomainGroupss();
 
   // Pass data to the page via props
-  return { props: { domains } };
-}
-
-function readFiles(dir: string): Domain[] {
-  const names = fs.readdirSync(dir).filter((i) => !i.startsWith("."));
-  return names.map((name) => {
-    const item: Domain = { name: name };
-    const certPath = path.join(dir, name, "fullchain.pem");
-    if (fs.existsSync(certPath)) {
-      try {
-        const socket = new TLSSocket(new Duplex(), {
-          cert: fs.readFileSync(certPath)
-        });
-        const cert = socket.getCertificate();
-        if (cert) {
-          item.cert = {
-            valid_from: (cert as PeerCertificate).valid_from,
-            valid_to: (cert as PeerCertificate).valid_to
-          };
-        }
-        socket.destroy();
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    return item;
-  });
+  return { props: { groups } };
 }
