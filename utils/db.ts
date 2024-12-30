@@ -3,6 +3,7 @@ import path from "path";
 import { PeerCertificate, TLSSocket } from "tls";
 import { Duplex } from "stream";
 import { JSONFilePreset } from 'lowdb/node'
+import { Low } from "lowdb";
 
 // const keyv = new Keyv({
 //   store: new KeyvFile({
@@ -10,7 +11,19 @@ import { JSONFilePreset } from 'lowdb/node'
 //   })
 // });
 
-const store = await JSONFilePreset('./data/data.json', {paths:[] as string[]})
+let storeIns: Low<{
+  paths: string[];
+}> | undefined = undefined;
+
+async function  getStore(){
+  if(storeIns == undefined){
+    // 创建数据目录
+    fs.existsSync('./data') || fs.mkdirSync('./data')
+
+    storeIns = await JSONFilePreset('./data/data.json', {paths:[] as string[]})
+  }
+  return storeIns
+}
 
 export type DomainGroup = {
   path: string;
@@ -84,7 +97,7 @@ export async function removePath(path:string): Promise<boolean>{
   // }
   // arr.splice(arr.indexOf(path), 1);
   // return await keyv.set("paths", arr);
-  await store.update(({paths})=>{
+  (await getStore()).update(({paths})=>{
     if(!paths.includes(path)){
       return false
     }
@@ -107,7 +120,7 @@ export async function addPath(path: string): Promise<boolean> {
   // }
   // arr.push(path);
   // return await keyv.set("paths", arr);
-  await store.update(({paths})=>{
+  (await getStore()).update(({paths})=>{
     if(paths.includes(path)){
       return false
     }
@@ -121,7 +134,7 @@ export async function addPath(path: string): Promise<boolean> {
  */
 export async function getPaths(): Promise<string[]> {
   // return (await keyv.get("paths")) || [];
-  return store.data.paths || []
+  return (await getStore()).data.paths || []
 }
 /**
  * 读取某个域名目录
