@@ -11,18 +11,11 @@ import { Low } from "lowdb";
 //   })
 // });
 
-let storeIns: Low<{
-  paths: string[];
-}> | undefined = undefined;
-
-async function  getStore(){
-  if(storeIns == undefined){
+async function  getStore(): Promise<Low<{ paths: string[]; }>> {
     // 创建数据目录
     fs.existsSync('./data') || fs.mkdirSync('./data')
 
-    storeIns = await JSONFilePreset('./data/data.json', {paths:[] as string[]})
-  }
-  return storeIns
+    return await JSONFilePreset('./data/data.json', {paths:[] as string[]})
 }
 
 export type DomainGroup = {
