@@ -38,3 +38,6 @@ data
 yarn.lock
 package-lock.json
 .env
+*.zip
+acme-viewer.service
+start.sh
