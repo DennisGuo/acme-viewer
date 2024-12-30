@@ -3,8 +3,8 @@ import '../app/globals.css'
 
 
 export const metadata = {
-  title: "Certbot Viewer",
-  description: "Web viewer for certbot."
+  title: "ACME Viewer",
+  description: "Web viewer for acme."
 };
  
 export default function MyApp({ Component, pageProps }) {

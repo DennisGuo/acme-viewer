@@ -2,14 +2,15 @@ import * as fs from "fs";
 import path from "path";
 import { PeerCertificate, TLSSocket } from "tls";
 import { Duplex } from "stream";
-import Keyv from "keyv";
-import { KeyvFile } from "keyv-file";
+import { JSONFilePreset } from 'lowdb/node'
 
-const keyv = new Keyv({
-  store: new KeyvFile({
-    filename: "./data/domains.json"
-  })
-});
+// const keyv = new Keyv({
+//   store: new KeyvFile({
+//     filename: "./data/domains.json"
+//   })
+// });
+
+const store = await JSONFilePreset('./data/data.json', {paths:[] as string[]})
 
 export type DomainGroup = {
   path: string;
@@ -77,12 +78,19 @@ export async function removePath(path:string): Promise<boolean>{
   if(!path){
     return false
   }
-  const arr = await getPaths();
-  if (!arr.includes(path)) {
-    return false;
-  }
-  arr.splice(arr.indexOf(path), 1);
-  return await keyv.set("paths", arr);
+  // const arr = await getPaths();
+  // if (!arr.includes(path)) {
+  //   return false;
+  // }
+  // arr.splice(arr.indexOf(path), 1);
+  // return await keyv.set("paths", arr);
+  await store.update(({paths})=>{
+    if(!paths.includes(path)){
+      return false
+    }
+    paths.splice(paths.indexOf(path), 1)
+  })
+  return true
 }
 /**
  * 保存扫描路径
@@ -93,19 +101,27 @@ export async function addPath(path: string): Promise<boolean> {
   if(!path){
     return false
   }
-  const arr = await getPaths();
-  if (arr.includes(path)) {
-    return false;
-  }
-  arr.push(path);
-  return await keyv.set("paths", arr);
+  // const arr = await getPaths();
+  // if (arr.includes(path)) {
+  //   return false;
+  // }
+  // arr.push(path);
+  // return await keyv.set("paths", arr);
+  await store.update(({paths})=>{
+    if(paths.includes(path)){
+      return false
+    }
+    paths.push(path)
+  })
+  return true
 }
 /**
  * 获取保存的扫描路径
  * @returns
  */
 export async function getPaths(): Promise<string[]> {
-  return (await keyv.get("paths")) || [];
+  // return (await keyv.get("paths")) || [];
+  return store.data.paths || []
 }
 /**
  * 读取某个域名目录

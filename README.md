@@ -37,10 +37,10 @@ AUTH_SALT=354120C6-C7A5-48C4-AD87-E2CEAE7A032D
 
 ```shell
 # clone repo
-git clone https://github.com/DennisGuo/certbot-viewer.git
+git clone https://github.com/DennisGuo/acme-viewer.git
 
 # install dependencies
-cd certbot-viewer
+cd acme-viewer
 npm install
 
 # build
@@ -57,21 +57,21 @@ npx next start -p 8080
 sudo systemctl daemon-reload
 
 # start on boot
-sudo systemctl enable certbot-viewer
+sudo systemctl enable acme-viewer
 
 # start service
-sudo systemctl start certbot-viewer
+sudo systemctl start acme-viewer
 
 # stop service
-sudo systemctl stop certbot-viewer
+sudo systemctl stop acme-viewer
 
 # restart service
-sudo systemctl restart certbot-viewer
+sudo systemctl restart acme-viewer
 
 # check status
-sudo systemctl status certbot-viewer
+sudo systemctl status acme-viewer
 
 # check logs
-sudo journalctl -u certbot-viewer
+sudo journalctl -efu acme-viewer
 
 ```

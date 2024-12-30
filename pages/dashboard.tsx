@@ -87,22 +87,22 @@ export default function DashboardPage({
     }
   };
 
-  const removePath = async (path:string)=>{
+  const removePath = async (path: string) => {
     const ok = confirm(`Confirm to remove【${path}】 path ?`);
-    if(ok){
+    if (ok) {
       const res = await fetch(`/api/domain/remove`, {
         method: "POST",
         body: JSON.stringify({ path })
       });
       const json = await res.json();
-      if(json.data){
+      if (json.data) {
         window.location.reload();
         alert("Remove Success !");
-      }else{
+      } else {
         alert("Remove Failed !");
       }
     }
-  }
+  };
 
   // const Certinfo = ({ cert }: { cert: PeerCertificate }) => {
   //   const from = dayjs(cert?.valid_from);
@@ -127,7 +127,7 @@ export default function DashboardPage({
         </div>
       </h1>
       <div className="flex flex-row flex-1">
-        <div className="w-80 p-4 border border-l-0 border-b-0 border-t-0 flex flex-col">
+        <div className="w-100 p-4 border border-l-0 border-b-0 border-t-0 flex flex-col">
           <h2 className="py-2 text-bold border border-t-0 border-l-0 border-r-0 ">
             Domain List
           </h2>
@@ -168,10 +168,15 @@ export default function DashboardPage({
                 return (
                   <div key={group.path}>
                     <div className="bg-slate-300 p-2 flex flex-row gap-x-2">
-                      <div className="flex-1">{group.path}</div>
-                      <button className="text-red-400 cursor-pinter text-sm" onClick={e=>removePath(group.path)}>
-                        Remove
-                      </button>
+                      <div className="flex-1 break-all">{group.path}</div>
+                      <div className="px-2">
+                        <button
+                          className="text-red-400 cursor-pinter text-sm"
+                          onClick={(e) => removePath(group.path)}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                     <div className="pl-4 flex flex-col gap-y-1 mt-1">
                       {group.domains.map((domain) => {
@@ -210,7 +215,7 @@ export default function DashboardPage({
                 );
               })}
             </div>
-            {groups.length == 0 ? <Empty text="No domain exists." /> : null}
+            {groups.length == 0 ? <Empty text="No .acme.sh path exists." /> : null}
           </div>
         </div>
         <div className="p-4 flex-1">

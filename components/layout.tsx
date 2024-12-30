@@ -11,7 +11,7 @@ export default function Layout({
 }>) {
 
   useEffect(() => {
-    document.title = 'Certbot Viewer'
+    document.title = 'ACME Viewer'
   }, [])
 
   return <>

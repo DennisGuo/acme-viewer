@@ -29,7 +29,7 @@ export default function LoginPage() {
   return (
     <div className="bg-blue-300 w-screen h-screen flex flex-row items-center justify-center">
       <div className="w-80 bg-white p-4 rounded-md shadow">
-        <h1 className="text-bold text-lg">Certbot Viewer</h1>
+        <h1 className="text-bold text-lg">ACME Viewer</h1>
         <div className="text-slate-300">Login</div>
         <form onSubmit={handleSubmit} className="flex flex-col mt-4 gap-y-2">
           <input
