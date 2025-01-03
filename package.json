@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "archiver": "^7.0.1",
     "cookie": "^1.0.2",
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.13",
@@ -21,6 +22,7 @@
     "react-toastify": "^10.0.5"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
     "@types/cookie": "^1.0.0",
     "@types/copy-text-to-clipboard": "^2.0.1",
     "@types/file-saver": "^2.0.7",

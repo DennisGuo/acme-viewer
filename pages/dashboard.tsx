@@ -14,6 +14,7 @@ export default function DashboardPage({
 }>) {
   const router = useRouter();
   const [crtDomain, setCrtDomain] = useState<Domain>();
+  const [crtPath, setCrtPath] = useState<string>();
 
   const [form, setForm] = useState(false);
   const [path, setPath] = useState("");
@@ -45,7 +46,8 @@ export default function DashboardPage({
     }
   };
 
-  const clickDomain = async (domain: Domain) => {
+  const clickDomain = async (path:string, domain: Domain) => {
+    setCrtPath(path)
     setCrtDomain(domain);
   };
 
@@ -102,6 +104,12 @@ export default function DashboardPage({
         alert("Remove Failed !");
       }
     }
+  };
+
+  const toDownloadZip = (name: string) => {
+    const dir = crtPath || ''
+    const url = `/api/domain/download-zip?dir=${encodeURIComponent(dir)}&name=${name}`;
+    window.open(url);
   };
 
   // const Certinfo = ({ cert }: { cert: PeerCertificate }) => {
@@ -189,7 +197,7 @@ export default function DashboardPage({
                                 : "bg-gray-100")
                             }
                             key={domain.name}
-                            onClick={() => clickDomain(domain)}
+                            onClick={() => clickDomain(group.path,domain)}
                           >
                             <div>{domain.name}</div>
                             {domain.cert ? (
@@ -215,12 +223,26 @@ export default function DashboardPage({
                 );
               })}
             </div>
-            {groups.length == 0 ? <Empty text="No .acme.sh path exists." /> : null}
+            {groups.length == 0 ? (
+              <Empty text="No .acme.sh path exists." />
+            ) : null}
           </div>
         </div>
         <div className="p-4 flex-1">
-          <h2 className="py-2 text-bold border border-t-0 border-l-0 border-r-0">
-            Domain Details {crtDomain ? ` / ` + crtDomain.name : ""}
+          <h2 className="py-2 text-bold border border-t-0 border-l-0 border-r-0 flex flex-row gap-x-4">
+            <div className="flex-1">
+              Domain Details {crtDomain ? ` / ` + crtDomain.name : ""}
+            </div>
+            {crtDomain?.name ? (
+              <div>
+                <div
+                  className="py-2 px-4 cursor-pointer bg-slate-300 text-white rounded hover:bg-slate-400"
+                  onClick={() => toDownloadZip(crtDomain.name)}
+                >
+                  Download Zip
+                </div>
+              </div>
+            ) : null}
           </h2>
           <div className="mt-4 grid grid-cols-3 gap-4">
             {files.map((item, index) => (

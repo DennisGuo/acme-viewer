@@ -49,7 +49,23 @@ npm run build
 npx next start -p 8080
 ```
 
-### Deoploy with systemd
+### Deoploy 
+
+#### standalone
+
+```shell
+cd .next/standalone/
+# zip build standalone files
+zip -r ../../acme-viewer.zip .
+# cp to server
+scp acme-viewer.zip user@host:/path/to/run
+
+# unzip 
+unzip acme-viewer.zip
+
+```
+
+#### systemd
 
 ```shell
 
